@@ -1,5 +1,5 @@
 {
-  "name": "DASHBOARD 5",
-  "description": "A high-performance dashboard for quality control data synced directly from a public Google Sheet with advanced filtering, SKU analysis, and rejection tracking.",
+  "name": "QUALITY ANALYTICS PRO",
+  "description": "A high-performance quality control dashboard with real-time Google Sheets synchronization, advanced SKU analysis, and PWA support.",
   "requestFramePermissions": []
 }

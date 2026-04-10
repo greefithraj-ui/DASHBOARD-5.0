@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings, X, RefreshCw, ChevronDown } from 'lucide-react';
+import { Settings, X, RefreshCw, ChevronDown, Download } from 'lucide-react';
 import { SheetConfig, ColumnMapping } from '../types';
 
 interface SettingsMenuProps {
@@ -10,6 +10,8 @@ interface SettingsMenuProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   isRefreshing: boolean;
+  deferredPrompt?: any;
+  onInstall?: () => void;
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ 
@@ -18,7 +20,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onUpdate, 
   isOpen, 
   setIsOpen,
-  isRefreshing
+  isRefreshing,
+  deferredPrompt,
+  onInstall
 }) => {
   const [localConfig, setLocalConfig] = useState(config);
 
@@ -117,6 +121,31 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
               ))}
             </div>
           </section>
+
+          {/* PWA Install Hint */}
+          {deferredPrompt && (
+            <section className="pt-4 border-t border-slate-100">
+              <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <Download className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-slate-900">Install App</h4>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Install Quality Analytics Pro on your device for a full-screen, offline-ready experience.
+                    </p>
+                    <button 
+                      onClick={onInstall}
+                      className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all shadow-md"
+                    >
+                      Install Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
         </div>
 
         <div className="p-6 border-t bg-slate-50 space-y-3">

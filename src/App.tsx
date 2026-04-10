@@ -121,6 +121,29 @@ const App: React.FC = () => {
   const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
   const [isAcceptedModalOpen, setIsAcceptedModalOpen] = useState(false);
   const [isWipModalOpen, setIsWipModalOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallApp = useCallback(async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  }, [deferredPrompt]);
 
   const handleSetSelectedBatches = useCallback((batches: string[]) => {
     syncLatestData();
@@ -822,7 +845,16 @@ ${rejectedDetailsStr || 'None'}
         </div>
       )}
 
-      <MemoizedSettingsMenu config={{...config, mapping: config.mapping || DEFAULT_MAPPING}} headers={headers} onUpdate={handleConfigUpdate} isOpen={isSettingsOpen} setIsOpen={setIsSettingsOpen} isRefreshing={loading} />
+      <MemoizedSettingsMenu 
+        config={{...config, mapping: config.mapping || DEFAULT_MAPPING}} 
+        headers={headers} 
+        onUpdate={handleConfigUpdate} 
+        isOpen={isSettingsOpen} 
+        setIsOpen={setIsSettingsOpen} 
+        isRefreshing={loading}
+        deferredPrompt={deferredPrompt}
+        onInstall={handleInstallApp}
+      />
       
       <MemoizedRejectionDrilldownModal 
         isOpen={isRejectionModalOpen} 
