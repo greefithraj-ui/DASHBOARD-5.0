@@ -27,6 +27,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   console.log('FilterSection: Rendered with batches:', batches?.length);
   const [isBatchOpen, setIsBatchOpen] = useState(false);
   const [showResetToast, setShowResetToast] = useState(false);
+  const [localSearch, setLocalSearch] = useState(uidSearch);
   const batchButtonRef = useRef<HTMLButtonElement>(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
 
@@ -54,13 +55,18 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     };
   }, [isBatchOpen]);
 
-  const handleClearAll = () => {
-    setDateRange({ start: null, end: null });
-    setSelectedBatches(batches);
-    setUidSearch('');
-    setShowResetToast(true);
-    setTimeout(() => setShowResetToast(false), 2000);
-  };
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setUidSearch(localSearch);
+    }, 300); // 300ms debounce as requested
+    return () => clearTimeout(timer);
+  }, [localSearch, setUidSearch]);
+
+  // Sync local search with prop if prop changes externally (e.g. on clear all)
+  useEffect(() => {
+    setLocalSearch(uidSearch);
+  }, [uidSearch]);
 
   const presets = [
     { label: 'ALL TIME', value: 'all' },
@@ -156,6 +162,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     setIsBatchOpen(false);
   };
 
+  const handleClearAll = () => {
+    setDateRange({ start: null, end: null });
+    setSelectedBatches(batches);
+    setUidSearch('');
+    setShowResetToast(true);
+    setTimeout(() => setShowResetToast(false), 2000);
+  };
+
   return (
     <div className="relative z-50 overflow-visible mb-8 bg-[#161a23] p-8 rounded-2xl border border-white/5 shadow-2xl animate-in fade-in duration-500">
       {/* Header with Search and Clear All Button */}
@@ -173,12 +187,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               type="text"
               placeholder="Search UID..."
               className="w-full pl-10 pr-10 py-2.5 bg-[#0f1117] border border-white/5 rounded-xl text-sm text-white focus:ring-2 focus:ring-[#38bdf8]/50 outline-none transition-all placeholder:text-[#9ca3af]/50 mono"
-              value={uidSearch}
-              onChange={(e) => setUidSearch(e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
             />
-            {uidSearch && (
+            {localSearch && (
               <button
-                onClick={() => setUidSearch('')}
+                onClick={() => setLocalSearch('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-[#ef4444] transition-colors"
               >
                 <X className="w-3.5 h-3.5" />

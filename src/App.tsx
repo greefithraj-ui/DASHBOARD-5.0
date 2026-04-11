@@ -117,6 +117,7 @@ const App: React.FC = () => {
   const [uidSearch, setUidSearch] = useState(() => {
     return localStorage.getItem('qc_dashboard_uid_search') || '';
   });
+  const [debouncedUidSearch, setDebouncedUidSearch] = useState(uidSearch);
   const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
   const [isAcceptedModalOpen, setIsAcceptedModalOpen] = useState(false);
   const [isWipModalOpen, setIsWipModalOpen] = useState(false);
@@ -465,10 +466,8 @@ const App: React.FC = () => {
 
     const batchCol = mapping.batchNo;
     const hasBatchFilter = batchCol && headers.includes(batchCol) && selectedBatches.length > 0 && selectedBatches.length < allUniqueBatches.length;
-    const searchTerm = uidSearch.trim().toLowerCase();
+    const searchTerm = debouncedUidSearch.trim().toLowerCase();
     const uidCol = mapping.uid;
-    const skuCol = mapping.sku;
-    const reasonCol = mapping.reason;
 
     const dateCol = mapping.date;
     const hasDateMapping = dateCol && headers.includes(dateCol);
@@ -499,25 +498,15 @@ const App: React.FC = () => {
         if (!selectedBatches.includes(rowBatch)) return false;
       }
 
-      // Global Search Filter (UID, SKU, Batch, Reason)
+      // UID Search Filter
       if (searchTerm) {
         const rowUid = String(row[uidCol] || '').toLowerCase();
-        const rowSku = String(row[skuCol] || '').toLowerCase();
-        const rowBatch = String(row[batchCol] || '').toLowerCase();
-        const rowReason = String(row[reasonCol] || '').toLowerCase();
-        
-        const matchesSearch = 
-          rowUid.includes(searchTerm) || 
-          rowSku.includes(searchTerm) || 
-          rowBatch.includes(searchTerm) ||
-          rowReason.includes(searchTerm);
-          
-        if (!matchesSearch) return false;
+        if (!rowUid.includes(searchTerm)) return false;
       }
 
       return true;
     });
-  }, [data, config, dateRange, selectedBatches, uidSearch, headers, allUniqueBatches]);
+  }, [data, config, dateRange, selectedBatches, debouncedUidSearch, headers, allUniqueBatches]);
 
   const stats: KPIStats = useMemo(() => {
     const mapping = config.mapping || DEFAULT_MAPPING;
