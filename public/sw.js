@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quality-analytics-v2'; // Change v1 to v2
+const CACHE_NAME = 'qa-pro-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
